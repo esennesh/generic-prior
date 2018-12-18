@@ -37,7 +37,9 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
-# extra-deps: []
+extra-deps:
+- git: git@github.com:esennesh/monad-bayes.git
+  commit: e33e7fcf2e54ec145663cd3d81f3d3876669cba6
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
