@@ -1,0 +1,62 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 72791ecbfb5fb109f7209be3011c6469e5a800e3aee109c0607e097e08c537bf
+
+name:           generic-prior
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/esennesh/generic-prior#readme>
+homepage:       https://github.com/esennesh/generic-prior#readme
+bug-reports:    https://github.com/esennesh/generic-prior/issues
+author:         Eli Sennesh
+maintainer:     esennesh@ccis.neu.edu
+copyright:      Eli Sennesh 2018
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/esennesh/generic-prior
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_generic_prior
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable generic-prior-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_generic_prior
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , generic-prior
+  default-language: Haskell2010
+
+test-suite generic-prior-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_generic_prior
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , generic-prior
+  default-language: Haskell2010
