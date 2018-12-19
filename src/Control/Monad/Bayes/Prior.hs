@@ -47,6 +47,12 @@ instance GMonadPrior U1 where
 instance GPriorScore U1 where
   gPriorProbability U1 = 1
 
+instance PriorScore a => GPriorScore (K1 i a) where
+  gPriorProbability (K1 a) = priorProbability a
+
+instance GPriorScore f => GPriorScore (M1 i t f) where
+  gPriorProbability (M1 f) = gPriorProbability f
+
 instance (GMonadPrior a, GMonadPrior b) => GMonadPrior (a :*: b) where
   gPrior = do
     a <- gPrior
@@ -89,3 +95,30 @@ instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPrior (a :+: b) where
   gPrior = let priors = gPriors in do
     i <- uniformD [0..length priors - 1]
     priors !! i
+
+class GPriorScoreSum f where
+  gPriorProbabilities :: [f p -> Log Double]
+
+instance GPriorScoreSum V1 where
+  gPriorProbabilities = [gPriorProbability]
+
+instance GPriorScoreSum U1 where
+  gPriorProbabilities = [gPriorProbability]
+
+instance (GPriorScore a, GPriorScore b) => GPriorScoreSum (a :*: b) where
+  gPriorProbabilities = [gPriorProbability]
+
+instance PriorScore a => GPriorScoreSum (K1 i a) where
+  gPriorProbabilities = [gPriorProbability]
+
+instance GPriorScore f => GPriorScoreSum (M1 i t f) where
+  gPriorProbabilities = [gPriorProbability]
+
+instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
+  gPriorProbabilities = map gLeftPrior as ++ map gRightPrior bs where
+    gLeftPrior f (L1 a) = f a
+    gLeftPrior _ (R1 _) = 0.0
+    gRightPrior _ (L1 _) = 0.0
+    gRightPrior g (R1 b) = g b
+    as = gPriorProbabilities
+    bs = gPriorProbabilities
