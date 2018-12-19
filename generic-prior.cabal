@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e373b8c137202ee83beff8497914c8803ca4c02e8c70aa409fdc297d0368e038
+-- hash: 4b434d4c1fe034d574f982069ebf9aba5ed9a1acd6a1905f17f41332d8f139ee
 
 name:           generic-prior
 version:        0.1.0.0
@@ -27,12 +27,13 @@ source-repository head
 
 library
   exposed-modules:
+      Control.Monad.Bayes.Example
       Control.Monad.Bayes.Prior
   other-modules:
       Paths_generic_prior
   hs-source-dirs:
       src
-  default-extensions: DeriveFoldable DeriveFunctor DeriveGeneric FlexibleInstances TypeOperators UndecidableInstances
+  default-extensions: DefaultSignatures DeriveGeneric FlexibleContexts FlexibleInstances TypeOperators UndecidableInstances
   build-depends:
       base >=4.7 && <5
     , log-domain

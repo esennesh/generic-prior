@@ -28,9 +28,9 @@ dependencies:
 library:
   source-dirs: src
   default-extensions:
-    - DeriveFoldable
-    - DeriveFunctor
+    - DefaultSignatures
     - DeriveGeneric
+    - FlexibleContexts
     - FlexibleInstances
     - TypeOperators
     - UndecidableInstances
