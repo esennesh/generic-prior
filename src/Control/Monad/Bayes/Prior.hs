@@ -19,6 +19,9 @@ import Control.Monad.Bayes.Class
 import GHC.Generics
 import Numeric.Log
 
+class MonadPrior a where
+  prior :: MonadSample m => m a
+
 class GMonadPrior f where
   gPrior :: (MonadSample m) => m (f p)
 
