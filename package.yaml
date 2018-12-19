@@ -31,7 +31,9 @@ library:
     - DeriveFoldable
     - DeriveFunctor
     - DeriveGeneric
-    - MultiParamTypeClasses
+    - FlexibleInstances
+    - TypeOperators
+    - UndecidableInstances
 
 tests:
   generic-prior-test:
