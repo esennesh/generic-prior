@@ -9,7 +9,7 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Prior (
-  GMonadPrior,
+  MonadPrior,
   GPriorScore
   --prior,
   --priorProbability,
@@ -21,6 +21,8 @@ import Numeric.Log
 
 class MonadPrior a where
   prior :: MonadSample m => m a
+  default prior :: (Generic a, GMonadPrior (Rep a), MonadSample m) => m a
+  prior = to <$> gPrior
 
 class GMonadPrior f where
   gPrior :: (MonadSample m) => m (f p)
