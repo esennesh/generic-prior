@@ -10,9 +10,9 @@ Portability : GHC
 
 module Control.Monad.Bayes.Prior (
   MonadPrior,
-  PriorScore
-  --prior,
-  --priorProbability,
+  PriorScore,
+  prior,
+  priorProbability,
 ) where
 
 import Control.Monad.Bayes.Class
