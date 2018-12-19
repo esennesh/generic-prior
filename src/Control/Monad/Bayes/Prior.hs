@@ -46,6 +46,12 @@ instance (GMonadPrior a, GMonadPrior b) => GMonadPrior (a :*: b) where
     b <- gPrior
     return (a :*: b)
 
+instance MonadPrior a => GMonadPrior (K1 i a) where
+  gPrior = K1 <$> prior
+
+instance GMonadPrior f => GMonadPrior (M1 i t f) where
+  gPrior = M1 <$> gPrior
+
 instance (GPriorScore a, GPriorScore b) => GPriorScore (a :*: b) where
   gPriorProbability (a :*: b) = gPriorProbability a * gPriorProbability b
 
