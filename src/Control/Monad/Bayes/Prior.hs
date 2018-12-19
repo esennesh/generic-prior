@@ -27,6 +27,11 @@ class MonadPrior a where
 class GMonadPrior f where
   gPrior :: (MonadSample m) => m (f p)
 
+class PriorScore a where
+  priorProbability :: a -> Log Double
+  default priorProbability :: (Generic a, GPriorScore (Rep a)) => a -> Log Double
+  priorProbability = gPriorProbability . from
+
 class GPriorScore f where
   gPriorProbability :: f p -> Log Double
 
