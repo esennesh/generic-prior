@@ -72,6 +72,12 @@ instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPriorSum (a :+: b) where
     as = gPriors
     bs = gPriors
 
+instance MonadPrior a => GMonadPriorSum (K1 i a) where
+  gPriors = [gPrior]
+
+instance GMonadPrior f => GMonadPriorSum (M1 i t f) where
+  gPriors = [gPrior]
+
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPrior (a :+: b) where
   gPrior = let priors = gPriors in do
     i <- uniformD [0..length priors - 1]
