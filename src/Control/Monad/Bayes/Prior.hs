@@ -10,7 +10,7 @@ Portability : GHC
 
 module Control.Monad.Bayes.Prior (
   MonadPrior,
-  GPriorScore
+  PriorScore
   --prior,
   --priorProbability,
 ) where
@@ -122,3 +122,7 @@ instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
     gRightPrior g (R1 b) = g b
     as = gPriorProbabilities
     bs = gPriorProbabilities
+
+instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScore (a :+: b) where
+  gPriorProbability x = Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
+    priors = gPriorProbabilities
