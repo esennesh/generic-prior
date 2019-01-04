@@ -15,6 +15,7 @@ module Control.Monad.Bayes.Prior (
   priorProbability,
 ) where
 
+import Control.Monad
 import Control.Monad.Bayes.Class
 import GHC.Generics
 import Numeric.Log
@@ -92,9 +93,7 @@ instance GMonadPrior f => GMonadPriorSum (M1 i t f) where
   gPriors = [gPrior]
 
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPrior (a :+: b) where
-  gPrior = let priors = gPriors in do
-    i <- uniformD [0..length priors - 1]
-    priors !! i
+  gPrior = join $ uniformD gPriors
 
 class GPriorScoreSum f where
   gPriorProbabilities :: [f p -> Log Double]
