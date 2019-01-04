@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4b434d4c1fe034d574f982069ebf9aba5ed9a1acd6a1905f17f41332d8f139ee
+-- hash: a94b18aa309f0c7d592ee5003e6af96dbc7b0f69db493d6a62b5c3aca0777579
 
 name:           generic-prior
 version:        0.1.0.0
@@ -27,7 +27,6 @@ source-repository head
 
 library
   exposed-modules:
-      Control.Monad.Bayes.Example
       Control.Monad.Bayes.Prior
   other-modules:
       Paths_generic_prior
