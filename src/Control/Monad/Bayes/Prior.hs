@@ -17,6 +17,7 @@ module Control.Monad.Bayes.Prior (
 
 import Control.Monad
 import Control.Monad.Bayes.Class
+import Control.Monad.Bayes.Grammar
 import GHC.Generics
 import Numeric.Log
 
@@ -125,3 +126,6 @@ instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
 instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScore (a :+: b) where
   gPriorProbability x = Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
     priors = gPriorProbabilities
+
+priorGrammar :: (MonadPrior a, MonadSample m, PriorScore a) => Grammar m a
+priorGrammar = Pure prior priorProbability
