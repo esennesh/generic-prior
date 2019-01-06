@@ -23,10 +23,7 @@ data Grammar f a where
   (:$) :: (a -> b) -> Grammar f a -> Grammar f b
 
 instance Functor f => Functor (Grammar f) where
-  fmap f (Pure fa) = Pure (f <$> fa)
-  fmap f (Choice fas) = Choice (map (fmap f) fas)
-  fmap f (fa :& fb) = f :$ (fa :& fb)
-  fmap f (g :$ fa) = (f . g) :$ fa
+  fmap f ga = f :$ ga
 
 sample :: MonadSample m => Grammar m a -> m a
 sample (Pure m) = m
