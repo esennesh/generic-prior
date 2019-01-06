@@ -8,7 +8,11 @@ Stability   : experimental
 Portability : GHC
 -}
 
-module Control.Monad.Bayes.Grammar where
+module Control.Monad.Bayes.Grammar (
+  Grammar,
+  sample,
+  nonparametric
+) where
 
 import Control.Monad
 import Control.Monad.Bayes.Class
