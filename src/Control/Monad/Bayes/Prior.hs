@@ -12,6 +12,7 @@ module Control.Monad.Bayes.Prior (
   MonadPrior,
   PriorScore,
   prior,
+  priorGrammar,
   priorProbability,
 ) where
 
