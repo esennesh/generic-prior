@@ -9,9 +9,10 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Grammar (
-  Grammar,
+  Grammar (Pure, Choice, (:&)),
+  measure,
+  nonparametric,
   sample,
-  nonparametric
 ) where
 
 import Control.Monad
