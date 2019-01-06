@@ -24,16 +24,11 @@ data Grammar f a where
   Pure :: f a -> Grammar f a
   Choice :: [Grammar f a] -> Grammar f a
   (:&) :: Grammar f a -> Grammar f b -> Grammar f (a, b)
-  (:$) :: (a -> b) -> Grammar f a -> Grammar f b
-
-instance Functor f => Functor (Grammar f) where
-  fmap f ga = f :$ ga
 
 sample :: MonadSample m => Grammar m a -> m a
 sample (Pure m) = m
 sample (Choice mas) = join . uniformD $ (sample <$> mas)
 sample (fa :& fb) = liftM2 (,) (sample fa) (sample fb)
-sample (f :$ fa) = f <$> sample fa
 
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
