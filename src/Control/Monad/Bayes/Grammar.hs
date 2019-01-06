@@ -33,10 +33,11 @@ sample (fa :& fb) = liftM2 (,) (sample fa) (sample fb)
 
 measure :: Grammar m a -> a -> Log Double
 measure (Pure _ p) a = p a
-measure (Choice (g:[])) a = measure g a
-measure (Choice (g:gs)) a | length gs >= 1 = first + rest - (first * rest) where
-  first = measure g a
-  rest = measure (Choice gs) a
+measure (Choice gs) a = measureChoice gs a (length gs) where
+  measureChoice [g] a k = measure g a / (fromIntegral k)
+  measureChoice (g:gs) a k | length gs >= 1 = first + rest - first * rest where
+    first = measureChoice [g] a k
+    rest = measureChoice gs a k
 measure (ga :& gb) (a, b) = (measure ga a) * (measure gb b)
 
 repeatM :: Monad m => m a -> m [a]
