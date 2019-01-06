@@ -21,12 +21,12 @@ import GHC.Generics
 import Numeric.Log
 
 data Grammar f a where
-  Pure :: f a -> Grammar f a
+  Pure :: f a -> (a -> Log Double) -> Grammar f a
   Choice :: [Grammar f a] -> Grammar f a
   (:&) :: Grammar f a -> Grammar f b -> Grammar f (a, b)
 
 sample :: MonadSample m => Grammar m a -> m a
-sample (Pure m) = m
+sample (Pure m _) = m
 sample (Choice mas) = join . uniformD $ (sample <$> mas)
 sample (fa :& fb) = liftM2 (,) (sample fa) (sample fb)
 
