@@ -128,5 +128,5 @@ instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScore (a :+: b) where
   gPriorProbability x = Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
     priors = gPriorProbabilities
 
-priorGrammar :: (MonadPrior a, MonadSample m, PriorScore a) => Grammar m a
-priorGrammar = Pure prior priorProbability
+priorGrammar :: (MonadPrior a, MonadSample m, PriorScore a) => Grammar m () a
+priorGrammar = Pure (const prior) (const priorProbability)
