@@ -21,27 +21,27 @@ import Data.Maybe
 import GHC.Generics
 import Numeric.Log
 
-data Grammar f a where
-  Pure :: f a -> (a -> Log Double) -> Grammar f a
-  Choice :: [Grammar f a] -> Grammar f a
-  (:&) :: Grammar f a -> Grammar f b -> Grammar f (a, b)
+data Grammar f a b where
+  Pure :: (a -> f b) -> (a -> b -> Log Double) -> Grammar f a b
+  Choice :: [Grammar f a b] -> Grammar f a b
+  (:&) :: Grammar f a b -> Grammar f a c -> Grammar f a (b, c)
 
-sample :: MonadSample m => Grammar m a -> m a
-sample (Pure m _) = m
-sample (Choice mas) = join . uniformD $ (sample <$> mas)
-sample (fa :& fb) = liftM2 (,) (sample fa) (sample fb)
+sample :: MonadSample m => Grammar m a b -> a -> m b
+sample (Pure m _) a = m a
+sample (Choice mas) a = join . uniformD $ [sample ma a | ma <- mas]
+sample (fa :& fb) a = liftM2 (,) (sample fa a) (sample fb a)
 
-measure :: Grammar m a -> a -> Log Double
-measure (Pure _ p) a = p a
-measure (Choice gs) a = measureChoice gs a (length gs) where
-  measureChoice [g] a k = measure g a / (fromIntegral k)
-  measureChoice (g:gs) a k | length gs >= 1 = first + rest - first * rest where
-    first = measureChoice [g] a k
-    rest = measureChoice gs a k
-measure (ga :& gb) (a, b) = (measure ga a) * (measure gb b)
+measure :: Grammar m a b -> a -> b -> Log Double
+measure (Pure _ p) a b = p a b
+measure (Choice gs) a b = measureChoice gs a b (length gs) where
+  measureChoice [g] a b k = measure g a b / (fromIntegral k)
+  measureChoice (g:gs) a b k = first + rest - first * rest where
+    first = measureChoice [g] a b k
+    rest = measureChoice gs a b k
+measure (ga :& gb) a (b, c) = (measure ga a b) * (measure gb a c)
 
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
-nonparametric :: MonadSample m => Grammar m a -> m [a]
-nonparametric g = repeatM (sample g)
+nonparametric :: MonadSample m => Grammar m a b -> a -> m [b]
+nonparametric g a = repeatM (sample g a)
