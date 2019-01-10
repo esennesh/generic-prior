@@ -9,7 +9,7 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Grammar (
-  Grammar (Pure, Choice, (:&)),
+  Grammar (Pure, Choice, (:&), (:|)),
   measure,
   nonparametric,
   sample,
