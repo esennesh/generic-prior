@@ -25,11 +25,16 @@ data Grammar f a b where
   Pure :: (a -> f b) -> (a -> b -> Log Double) -> Grammar f a b
   Choice :: [Grammar f a b] -> Grammar f a b
   (:&) :: Grammar f a b -> Grammar f a c -> Grammar f a (b, c)
+  (:|) :: ((a -> Maybe (f b)), (a -> b -> Log Double)) -> Grammar f a b ->
+          Grammar f a b
 
 sample :: MonadSample m => Grammar m a b -> a -> m b
 sample (Pure m _) a = m a
 sample (Choice mas) a = join . uniformD $ [sample ma a | ma <- mas]
 sample (fa :& fb) a = liftM2 (,) (sample fa a) (sample fb a)
+sample ((ma, _) :| fb) a = case ma a of
+  Just mb -> mb
+  Nothing -> sample fb a
 
 measure :: Grammar m a b -> a -> b -> Log Double
 measure (Pure _ p) a b = p a b
@@ -39,6 +44,9 @@ measure (Choice gs) a b = measureChoice gs a b (length gs) where
     first = measureChoice [g] a b k
     rest = measureChoice gs a b k
 measure (ga :& gb) a (b, c) = (measure ga a b) * (measure gb a c)
+measure ((_, p) :| fb) a b = if density /= 0 then density else measure fb a b
+  where
+    density = p a b
 
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
