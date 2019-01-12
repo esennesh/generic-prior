@@ -53,3 +53,16 @@ repeatM m = sequence . repeat $ m
 
 nonparametric :: MonadSample m => Grammar m a b -> a -> m [b]
 nonparametric g a = repeatM (sample g a)
+
+crpMem :: MonadSample m => Double -> m a -> m [a]
+crpMem alpha base = go [] where
+  go customers = let n = fromIntegral $ length customers in do
+    r <- uniform 0 1
+    if (r < alpha / (n + alpha)) then do
+      first <- base
+      rest <- go (first:customers)
+      return (first:rest)
+    else do
+      draw <- uniformD customers
+      rest <- go (draw:customers)
+      return (draw:rest)
