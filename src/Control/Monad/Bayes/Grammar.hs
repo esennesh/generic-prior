@@ -53,7 +53,7 @@ repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
 adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
-adaptor alpha g a = crpMem alpha (sample g a) id
+adaptor alpha g a = refactoring alpha g a id
 
 refactoring :: MonadSample m => Log Double -> Grammar m a b -> a -> (b -> b) ->
                m [b]
