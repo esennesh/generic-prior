@@ -54,12 +54,12 @@ repeatM m = sequence . repeat $ m
 adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
 adaptor alpha g a = crpMem alpha (sample g a)
 
-crpMem :: MonadSample m => Log Double -> m a -> m [a]
-crpMem alpha base = draw [] where
+crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
+crpMem alpha base transformMemo = draw [] where
   draw memo = drawBase memo >>= permute memo
   drawBase memo = let n = fromIntegral $ length memo in do
     r <- Exp . log <$> uniform 0 1
     if r < alpha / (n + alpha) then base else uniformD memo
-  permute memo sample = do
+  permute memo s = let sample = transformMemo s in do
     rest <- draw (sample:memo)
     return (sample:rest)
