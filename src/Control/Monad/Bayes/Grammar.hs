@@ -12,6 +12,7 @@ module Control.Monad.Bayes.Grammar (
   adaptor,
   Grammar (Pure, Choice, (:&), (:|)),
   measure,
+  refactoring,
   sample,
 ) where
 
@@ -53,6 +54,10 @@ repeatM m = sequence . repeat $ m
 
 adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
 adaptor alpha g a = crpMem alpha (sample g a) id
+
+refactoring :: MonadSample m => Log Double -> Grammar m a b -> a -> (b -> b) ->
+               m [b]
+refactoring alpha g a f = crpMem alpha (sample g a) f
 
 crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
 crpMem alpha base transformMemo = draw [] where
