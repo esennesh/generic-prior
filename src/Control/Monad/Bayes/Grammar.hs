@@ -9,9 +9,9 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Grammar (
+  adaptor,
   Grammar (Pure, Choice, (:&), (:|)),
   measure,
-  nonparametric,
   sample,
 ) where
 
@@ -51,5 +51,15 @@ measure ((_, p) :| fb) a b = if density /= 0 then density else measure fb a b
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
-nonparametric :: MonadSample m => Grammar m a b -> a -> m [b]
-nonparametric g a = repeatM (sample g a)
+adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
+adaptor alpha g a = crpMem alpha (sample g a)
+
+crpMem :: MonadSample m => Log Double -> m a -> m [a]
+crpMem alpha base = draw [] where
+  draw memo = drawBase memo >>= permute memo
+  drawBase memo = let n = fromIntegral $ length memo in do
+    r <- Exp . log <$> uniform 0 1
+    if r < alpha / (n + alpha) then base else uniformD memo
+  permute memo sample = do
+    rest <- draw (sample:memo)
+    return (sample:rest)
