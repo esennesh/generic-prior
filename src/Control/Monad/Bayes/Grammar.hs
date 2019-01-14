@@ -52,7 +52,7 @@ repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
 adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
-adaptor alpha g a = crpMem alpha (sample g a)
+adaptor alpha g a = crpMem alpha (sample g a) id
 
 crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
 crpMem alpha base transformMemo = draw [] where
