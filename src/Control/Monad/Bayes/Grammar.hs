@@ -9,10 +9,9 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Grammar (
-  adaptor,
+  adapt,
   Grammar (Pure, Choice, (:&)),
   measure,
-  refactoring,
   sample,
 ) where
 
@@ -48,19 +47,22 @@ measure (ga :& gb) a (b, c) = (measure ga a b) * (measure gb a c)
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
-adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> Maybe (m [b])
-adaptor alpha g a = refactoring alpha g a id
+adapt :: MonadSample m => Grammar m a b -> (forall b. m b -> m [b]) -> a ->
+         Maybe (m [b])
+adapt (Pure m _) adaptor a = adaptor <$> m a
+adapt (Choice gs) adaptor a = case catMaybes [adapt g adaptor a | g <- gs] of
+  [] -> Nothing
+  mbs -> Just . join . uniformD $ mbs
+adapt (ga :& gb) adaptor a = case (adapt ga adaptor a, adapt gb adaptor a) of
+  (Just mb, Just mb') -> Just $ liftM2 zip mb mb'
+  _ -> Nothing
 
-refactoring :: MonadSample m => Log Double -> Grammar m a b -> a -> (b -> b) ->
-               Maybe (m [b])
-refactoring alpha g a f = sample g a >>= \mb -> return (crpMem alpha mb f)
-
-crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
-crpMem alpha base transformMemo = draw [] where
+crpMem :: MonadSample m => Log Double -> m a -> m [a]
+crpMem alpha base = draw [] where
   draw memo = drawBase memo >>= permute memo
   drawBase memo = let n = fromIntegral $ length memo in do
     r <- Exp . log <$> uniform 0 1
     if r < alpha / (n + alpha) then base else uniformD memo
-  permute memo s = let sample = transformMemo s in do
-    rest <- draw (sample:memo)
-    return (sample:rest)
+  permute memo s = do
+    rest <- draw (s:memo)
+    return (s:rest)
