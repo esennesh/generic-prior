@@ -48,12 +48,12 @@ measure (ga :& gb) a (b, c) = (measure ga a b) * (measure gb a c)
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
-adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
+adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> Maybe (m [b])
 adaptor alpha g a = refactoring alpha g a id
 
 refactoring :: MonadSample m => Log Double -> Grammar m a b -> a -> (b -> b) ->
-               m [b]
-refactoring alpha g a f = crpMem alpha (sample g a) f
+               Maybe (m [b])
+refactoring alpha g a f = sample g a >>= \mb -> return (crpMem alpha mb f)
 
 crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
 crpMem alpha base transformMemo = draw [] where
