@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9fefc6034f95fdad9d77e1c09c4f042bbd54dbff57e080b8af2999d8cd7913e3
+-- hash: ce3f53853088422961153fd00a1550d9acc81ea2e069f131ec2df59a7d7ac7cc
 
 name:           generic-prior
 version:        0.1.0.0
@@ -33,7 +33,7 @@ library
       Paths_generic_prior
   hs-source-dirs:
       src
-  default-extensions: DefaultSignatures DeriveGeneric FlexibleContexts FlexibleInstances GADTs TypeOperators UndecidableInstances
+  default-extensions: DefaultSignatures DeriveGeneric FlexibleContexts FlexibleInstances GADTs RankNTypes TypeOperators UndecidableInstances
   build-depends:
       base >=4.7 && <5
     , log-domain
