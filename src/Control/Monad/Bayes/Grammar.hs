@@ -10,7 +10,7 @@ Portability : GHC
 
 module Control.Monad.Bayes.Grammar (
   adaptor,
-  Grammar (Pure, Choice, (:&), (:|)),
+  Grammar (Pure, Choice, (:&)),
   measure,
   refactoring,
   sample,
@@ -23,19 +23,18 @@ import GHC.Generics
 import Numeric.Log
 
 data Grammar f a b where
-  Pure :: (a -> f b) -> (a -> b -> Log Double) -> Grammar f a b
+  Pure :: (a -> Maybe (f b)) -> (a -> b -> Log Double) -> Grammar f a b
   Choice :: [Grammar f a b] -> Grammar f a b
   (:&) :: Grammar f a b -> Grammar f a c -> Grammar f a (b, c)
-  (:|) :: ((a -> Maybe (f b)), (a -> b -> Log Double)) -> Grammar f a b ->
-          Grammar f a b
 
-sample :: MonadSample m => Grammar m a b -> a -> m b
+sample :: MonadSample m => Grammar m a b -> a -> Maybe (m b)
 sample (Pure m _) a = m a
-sample (Choice mas) a = join . uniformD $ [sample ma a | ma <- mas]
-sample (fa :& fb) a = liftM2 (,) (sample fa a) (sample fb a)
-sample ((ma, _) :| fb) a = case ma a of
-  Just mb -> mb
-  Nothing -> sample fb a
+sample (Choice mas) a = case catMaybes [sample ma a | ma <- mas] of
+  [] -> Nothing
+  mas -> Just . join . uniformD $ mas
+sample (fa :& fb) a = case (sample fa a, sample fb a) of
+  (Just ma, Just mb) -> Just $ liftM2 (,) ma mb
+  _ -> Nothing
 
 measure :: Grammar m a b -> a -> b -> Log Double
 measure (Pure _ p) a b = p a b
@@ -45,19 +44,16 @@ measure (Choice gs) a b = measureChoice gs a b (length gs) where
     first = measureChoice [g] a b k
     rest = measureChoice gs a b k
 measure (ga :& gb) a (b, c) = (measure ga a b) * (measure gb a c)
-measure ((_, p) :| fb) a b = if density /= 0 then density else measure fb a b
-  where
-    density = p a b
 
 repeatM :: Monad m => m a -> m [a]
 repeatM m = sequence . repeat $ m
 
-adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> m [b]
+adaptor :: MonadSample m => Log Double -> Grammar m a b -> a -> Maybe (m [b])
 adaptor alpha g a = refactoring alpha g a id
 
 refactoring :: MonadSample m => Log Double -> Grammar m a b -> a -> (b -> b) ->
-               m [b]
-refactoring alpha g a f = crpMem alpha (sample g a) f
+               Maybe (m [b])
+refactoring alpha g a f = sample g a >>= \mb -> return (crpMem alpha mb f)
 
 crpMem :: MonadSample m => Log Double -> m a -> (a -> a) -> m [a]
 crpMem alpha base transformMemo = draw [] where

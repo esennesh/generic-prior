@@ -129,4 +129,4 @@ instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScore (a :+: b) where
     priors = gPriorProbabilities
 
 priorGrammar :: (MonadPrior a, MonadSample m, PriorScore a) => Grammar m () a
-priorGrammar = Pure (const prior) (const priorProbability)
+priorGrammar = Pure (const (Just prior)) (const priorProbability)
