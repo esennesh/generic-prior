@@ -33,6 +33,7 @@ library:
     - FlexibleContexts
     - FlexibleInstances
     - GADTs
+    - RankNTypes
     - TypeOperators
     - UndecidableInstances
 
