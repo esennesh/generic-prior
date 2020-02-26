@@ -35,11 +35,6 @@ class PriorScore a where
   default priorProbability :: (Generic a, GPriorScore (Rep a)) => a -> Log Double
   priorProbability = gPriorProbability . from
 
-type Distr m a = (m a, a -> Log Double)
-
-priorDistr :: (MonadPrior a, MonadSample m, PriorScore a) => Distr m a
-priorDistr = (prior, priorProbability)
-
 class GPriorScore f where
   gPriorProbability :: f p -> Log Double
 
