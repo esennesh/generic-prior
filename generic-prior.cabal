@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.0.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ce3f53853088422961153fd00a1550d9acc81ea2e069f131ec2df59a7d7ac7cc
+-- hash: 54dc00bc5a7156486fa4c35183183d069c2dcac2fdcef97337aada44535b7195
 
 name:           generic-prior
 version:        0.1.0.0
@@ -28,17 +28,21 @@ source-repository head
 library
   exposed-modules:
       Control.Monad.Bayes.Grammar
+      Control.Monad.Bayes.Partial
       Control.Monad.Bayes.Prior
   other-modules:
       Paths_generic_prior
   hs-source-dirs:
       src
-  default-extensions: DefaultSignatures DeriveGeneric FlexibleContexts FlexibleInstances GADTs RankNTypes TypeOperators UndecidableInstances
+  default-extensions: DefaultSignatures DeriveGeneric FlexibleContexts FlexibleInstances GADTs RankNTypes StandaloneDeriving TypeOperators UndecidableInstances
   build-depends:
       base >=4.7 && <5
     , log-domain
     , monad-bayes
+    , mtl
+    , statistics
     , transformers
+    , unification-fd
   default-language: Haskell2010
 
 test-suite generic-prior-test
@@ -54,5 +58,8 @@ test-suite generic-prior-test
     , generic-prior
     , log-domain
     , monad-bayes
+    , mtl
+    , statistics
     , transformers
+    , unification-fd
   default-language: Haskell2010
