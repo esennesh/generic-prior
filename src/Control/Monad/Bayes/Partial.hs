@@ -24,6 +24,9 @@ import Data.Maybe
 import GHC.Generics
 import Numeric.Log
 
+instance MonadPrior1 f => MonadPrior (Fix f) where
+  prior = Fix <$> prior1
+
 instance PriorScore1 f => PriorScore (Fix f) where
   priorProbability (Fix f) = priorProbability1 f
 
@@ -34,6 +37,11 @@ type UExcept f      = Either (Failure f)
 
 evalFBM :: Binder f a -> UExcept f a
 evalFBM = runIdentity . evalIntBindingT
+
+unifySample :: (Unifiable f, MonadPrior1 f, MonadSample m) => UTerm f IntVar ->
+               m (Fix f)
+unifySample (UVar _) = Fix <$> prior1
+unifySample (UTerm t) = Fix <$> mapM unifySample t
 
 unifyDensity :: (Unifiable f, PriorScore1 f) => UTerm f IntVar -> Fix f ->
                                                 Log Double
