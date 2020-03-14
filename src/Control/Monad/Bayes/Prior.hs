@@ -73,26 +73,13 @@ instance (GPriorScore a, GPriorScore b) => GPriorScore (a :*: b) where
 
 class GMonadPriorSum f where
   gPriors :: MonadSample m => [m (f p)]
-
-instance GMonadPriorSum V1 where
-  gPriors = [gPrior]
-
-instance GMonadPriorSum U1 where
-  gPriors = [gPrior]
-
-instance (GMonadPrior a, GMonadPrior b) => GMonadPriorSum (a :*: b) where
+  default gPriors :: (GMonadPrior f, MonadSample m) => [m (f p)]
   gPriors = [gPrior]
 
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPriorSum (a :+: b) where
   gPriors = (map (L1 <$>) as) ++ (map (R1 <$>) bs) where
     as = gPriors
     bs = gPriors
-
-instance MonadPrior a => GMonadPriorSum (K1 i a) where
-  gPriors = [gPrior]
-
-instance GMonadPrior f => GMonadPriorSum (M1 i t f) where
-  gPriors = [gPrior]
 
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPrior (a :+: b) where
   gPrior = join $ uniformD gPriors
