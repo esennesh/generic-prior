@@ -86,20 +86,7 @@ instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPrior (a :+: b) where
 
 class GPriorScoreSum f where
   gPriorProbabilities :: [f p -> Log Double]
-
-instance GPriorScoreSum V1 where
-  gPriorProbabilities = [gPriorProbability]
-
-instance GPriorScoreSum U1 where
-  gPriorProbabilities = [gPriorProbability]
-
-instance (GPriorScore a, GPriorScore b) => GPriorScoreSum (a :*: b) where
-  gPriorProbabilities = [gPriorProbability]
-
-instance PriorScore a => GPriorScoreSum (K1 i a) where
-  gPriorProbabilities = [gPriorProbability]
-
-instance GPriorScore f => GPriorScoreSum (M1 i t f) where
+  default gPriorProbabilities :: GPriorScore f => [f p -> Log Double]
   gPriorProbabilities = [gPriorProbability]
 
 instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
