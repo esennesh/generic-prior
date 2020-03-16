@@ -23,7 +23,10 @@ dependencies:
 - base >= 4.7 && < 5
 - log-domain
 - monad-bayes
+- mtl
+- statistics
 - transformers
+- unification-fd
 
 library:
   source-dirs: src
@@ -34,6 +37,7 @@ library:
     - FlexibleInstances
     - GADTs
     - RankNTypes
+    - StandaloneDeriving
     - TypeOperators
     - UndecidableInstances
 

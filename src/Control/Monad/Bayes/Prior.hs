@@ -9,11 +9,11 @@ Portability : GHC
 -}
 
 module Control.Monad.Bayes.Prior (
-  MonadPrior,
-  PriorScore,
-  prior,
+  MonadPrior, MonadPrior1,
+  PriorScore, PriorScore1,
+  prior, prior1,
   priorGrammar,
-  priorProbability,
+  priorProbability, priorProbability1,
 ) where
 
 import Control.Monad
@@ -111,8 +111,123 @@ instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
     bs = gPriorProbabilities
 
 instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScore (a :+: b) where
-  gPriorProbability x = Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
-    priors = gPriorProbabilities
+  gPriorProbability x =
+    Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
+      priors = gPriorProbabilities
 
 priorGrammar :: (MonadPrior a, MonadSample m, PriorScore a) => Grammar m () a
 priorGrammar = Pure (const (Just prior)) (const priorProbability)
+
+class MonadPrior1 f where
+  prior1 :: (MonadPrior a, MonadSample m) => m (f a)
+  default prior1 :: (Generic1 f, GMonadPrior1 (Rep1 f), MonadPrior a,
+                     MonadSample m) => m (f a)
+  prior1 = to1 <$> gPrior1
+
+class GMonadPrior1 g where
+  gPrior1 :: (MonadPrior p, MonadSample m) => m (g p)
+
+class GMonadPriorSum1 g where
+  gPriors1 :: (MonadPrior p, MonadSample m) => [m (g p)]
+  default gPriors1 :: (GMonadPrior1 g, MonadPrior p, MonadSample m) => [m (g p)]
+  gPriors1 = [gPrior1]
+
+class PriorScore1 f where
+  priorProbability1 :: PriorScore a => f a -> Log Double
+  default priorProbability1 :: (Generic1 f, GPriorScore1 (Rep1 f), PriorScore a)
+                               => f a -> Log Double
+  priorProbability1 = gPriorProbability1 . from1
+
+class GPriorScore1 g where
+  gPriorProbability1 :: PriorScore p => g p -> Log Double
+
+instance GMonadPrior1 Par1 where
+  gPrior1 = Par1 <$> prior
+
+instance GMonadPriorSum1 Par1
+
+instance GPriorScore1 Par1 where
+  gPriorProbability1 (Par1 p) = priorProbability p
+
+instance GMonadPrior1 f => GMonadPrior1 (Rec1 f) where
+  gPrior1 = Rec1 <$> gPrior1
+
+instance GMonadPrior1 f => GMonadPriorSum1 (Rec1 f)
+
+instance GPriorScore1 f => GPriorScore1 (Rec1 f) where
+  gPriorProbability1 (Rec1 a) = gPriorProbability1 a
+
+instance GMonadPrior1 V1 where
+  gPrior1 = error "Cannot sample from Void!"
+
+instance GPriorScore1 V1 where
+  gPriorProbability1 _ = 0
+
+instance GMonadPrior1 U1 where
+  gPrior1 = return U1
+
+instance GPriorScore1 U1 where
+  gPriorProbability1 U1 = 1
+
+instance MonadPrior a => GMonadPrior1 (K1 i a) where
+  gPrior1 = K1 <$> prior
+
+instance PriorScore a => GPriorScore1 (K1 i a) where
+  gPriorProbability1 (K1 c) = priorProbability c
+
+instance GMonadPrior1 f => GMonadPrior1 (M1 i t f) where
+  gPrior1 = M1 <$> gPrior1
+
+instance GPriorScore1 f => GPriorScore1 (M1 i t f) where
+  gPriorProbability1 (M1 f) = gPriorProbability1 f
+
+instance (GMonadPrior1 a, GMonadPrior1 b) => GMonadPrior1 (a :*: b) where
+  gPrior1 = do
+    a <- gPrior1
+    b <- gPrior1
+    return (a :*: b)
+
+instance GMonadPriorSum1 V1
+instance GMonadPriorSum1 U1
+instance MonadPrior a => GMonadPriorSum1 (K1 i a)
+instance GMonadPrior1 f => GMonadPriorSum1 (M1 i t f)
+instance (GMonadPrior1 a, GMonadPrior1 b) => GMonadPriorSum1 (a :*: b)
+
+instance (GMonadPriorSum1 a, GMonadPriorSum1 b) =>
+         GMonadPriorSum1 (a :+: b) where
+  gPriors1 = (map (L1 <$>) as) ++ (map (R1 <$>) bs) where
+    as = gPriors1
+    bs = gPriors1
+
+instance (GMonadPriorSum1 a, GMonadPriorSum1 b) => GMonadPrior1 (a :+: b) where
+  gPrior1 = join $ uniformD gPriors1
+
+instance (GPriorScore1 a, GPriorScore1 b) => GPriorScore1 (a :*: b) where
+  gPriorProbability1 (a :*: b) = gPriorProbability1 a * gPriorProbability1 b
+
+class GPriorScoreSum1 g where
+  gPriorProbabilities1 :: PriorScore p => [g p -> Log Double]
+  default gPriorProbabilities1 :: (GPriorScore1 g, PriorScore p) =>
+                                  [g p -> Log Double]
+  gPriorProbabilities1 = [gPriorProbability1]
+
+instance GPriorScoreSum1 V1
+instance GPriorScoreSum1 U1
+instance PriorScore a => GPriorScoreSum1 (K1 i a)
+instance GPriorScore1 f => GPriorScoreSum1 (M1 i t f)
+instance (GPriorScore1 a, GPriorScore1 b) => GPriorScoreSum1 (a :*: b)
+
+instance (GPriorScoreSum1 a, GPriorScoreSum1 b) =>
+         GPriorScoreSum1 (a :+: b) where
+  gPriorProbabilities1 = map gLeftPrior as ++ map gRightPrior bs where
+    gLeftPrior f (L1 a) = f a
+    gLeftPrior _ (R1 _) = 0.0
+    gRightPrior _ (L1 _) = 0.0
+    gRightPrior g (R1 b) = g b
+    as = gPriorProbabilities1
+    bs = gPriorProbabilities1
+
+instance (GPriorScoreSum1 a, GPriorScoreSum1 b) => GPriorScore1 (a :+: b) where
+  gPriorProbability1 x =
+    Prelude.sum [f x | f <- priors] / (fromIntegral $ length priors) where
+      priors = gPriorProbabilities1
