@@ -76,6 +76,12 @@ class GMonadPriorSum f where
   default gPriors :: (GMonadPrior f, MonadSample m) => [m (f p)]
   gPriors = [gPrior]
 
+instance GMonadPriorSum V1
+instance GMonadPriorSum U1
+instance MonadPrior a => GMonadPriorSum (K1 i a)
+instance GMonadPrior f => GMonadPriorSum (M1 i t f)
+instance (GMonadPrior a, GMonadPrior b) => GMonadPriorSum (a :*: b)
+
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPriorSum (a :+: b) where
   gPriors = (map (L1 <$>) as) ++ (map (R1 <$>) bs) where
     as = gPriors
@@ -88,6 +94,12 @@ class GPriorScoreSum f where
   gPriorProbabilities :: [f p -> Log Double]
   default gPriorProbabilities :: GPriorScore f => [f p -> Log Double]
   gPriorProbabilities = [gPriorProbability]
+
+instance GPriorScoreSum V1
+instance GPriorScoreSum U1
+instance PriorScore a => GPriorScoreSum (K1 i a)
+instance GPriorScore f => GPriorScoreSum (M1 i t f)
+instance (GPriorScore a, GPriorScore b) => GPriorScoreSum (a :*: b)
 
 instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
   gPriorProbabilities = map gLeftPrior as ++ map gRightPrior bs where
