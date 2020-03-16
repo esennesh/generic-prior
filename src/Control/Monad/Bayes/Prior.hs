@@ -95,6 +95,12 @@ class GPriorScoreSum f where
   default gPriorProbabilities :: GPriorScore f => [f p -> Log Double]
   gPriorProbabilities = [gPriorProbability]
 
+instance GPriorScoreSum V1
+instance GPriorScoreSum U1
+instance PriorScore a => GPriorScoreSum (K1 i a)
+instance GPriorScore f => GPriorScoreSum (M1 i t f)
+instance (GPriorScore a, GPriorScore b) => GPriorScoreSum (a :*: b)
+
 instance (GPriorScoreSum a, GPriorScoreSum b) => GPriorScoreSum (a :+: b) where
   gPriorProbabilities = map gLeftPrior as ++ map gRightPrior bs where
     gLeftPrior f (L1 a) = f a
