@@ -76,6 +76,12 @@ class GMonadPriorSum f where
   default gPriors :: (GMonadPrior f, MonadSample m) => [m (f p)]
   gPriors = [gPrior]
 
+instance GMonadPriorSum V1
+instance GMonadPriorSum U1
+instance MonadPrior a => GMonadPriorSum (K1 i a)
+instance GMonadPrior f => GMonadPriorSum (M1 i t f)
+instance (GMonadPrior a, GMonadPrior b) => GMonadPriorSum (a :*: b)
+
 instance (GMonadPriorSum a, GMonadPriorSum b) => GMonadPriorSum (a :+: b) where
   gPriors = (map (L1 <$>) as) ++ (map (R1 <$>) bs) where
     as = gPriors
